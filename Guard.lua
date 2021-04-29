@@ -3,7 +3,10 @@
 	GUARD
 	
 	Guard is a framework for creating anti-cheats. Guard allows you to bind several processes to certain points
-	in the guard cycle. 
+	in the guard cycle.
+	
+	WARNING: Guard is a base framework for an anti-cheat, you need to build the algorithms with the framework. Guard does not come
+	pre-installed with any kind of exploit detection.
 	
 	- Darmyn AKA darmantinjr
 
@@ -91,9 +94,9 @@ function PlayerInfo.new(player)
 	self._connections = {}
 	
 	local deathConnection = self.humanoid.Died:Connect(function()
-		self.alive = true
-		self.character.CharacterAdded:Wait()
 		self.alive = false
+		self.player.CharacterAdded:Wait()
+		self.alive = true
 		
 	end)
 	table.insert(self._connections, deathConnection)
@@ -200,16 +203,21 @@ function Guard.new(player)
 	end
 
 	function self:Scan()
-		if (os.clock() - cBuff.lastBuffer) >= self.buffSpeed then
-			cBuff.lastBuffer = os.clock()
+		
+		if (os.clock() - cBuff.lastBuffer) > self.buffSpeed then
 			if playerInfo:IsInGame() then
 				if playerInfo.alive then
+					
 					cBuff.bufferSize = self.buffSize
 					cBuff:Write({
 						CFrame = playerInfo:GetCFrame();
 					})
 					bindBins["onCycle"]:Fire()
-					bindBins["onScan"]:Fire()
+					cBuff.lastBuffer = os.clock()
+					
+					if #cBuff.buffer > 2 then
+						bindBins["onScan"]:Fire()
+					end
 				end
 			else
 				self:Destroy()
@@ -227,6 +235,14 @@ function Guard.new(player)
 	
 	function self:Read()
 		return cBuff:Read()
+	end
+	
+	function self:GetBuffer()
+		return cBuff.buffer
+	end
+	
+	function self:SecondsToBuffSize(seconds)
+		return seconds / self.buffSpeed
 	end
 	
 	function self:Bind(bindBin, callback)
