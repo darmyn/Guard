@@ -29,7 +29,7 @@ function PlayerAdded(player)
 	local scanBind = guard:Bind("onScan", function()
 		local cHead, cNeck = guard:Read()
 		print(cHead, cNeck)
-		-- this is where you run algorithms to determin if players are cheating.
+		-- this is where you run algorithms to determine if players are cheating.
 	end)
 	
 end
