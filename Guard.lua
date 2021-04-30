@@ -24,15 +24,15 @@ local Bind = {}
 Bind.__index = Bind
 
 function Bind.new(bindBin, callback)
-	
+
 	local self = setmetatable({}, Bind)
-	
+
 	self.bindBin = bindBin
 	self.callback = callback
 	self.binded = true
-	
+
 	return self
-	
+
 end
 
 function Bind:Fire()
@@ -50,9 +50,9 @@ BindBin.__index = BindBin
 
 function BindBin.new()
 	local self = setmetatable({}, BindBin)
-	
+
 	self.binds = {}
-	
+
 	return self
 end
 
@@ -81,28 +81,28 @@ local PlayerInfo = {}
 PlayerInfo.__index = PlayerInfo
 
 function PlayerInfo.new(player)
-	
+
 	local self = setmetatable({}, PlayerInfo)
-	
+
 	self.player = player
 	self.character = player.Character or player.CharacterAdded:Wait()
 	self.humanoid = self.character:WaitForChild("Humanoid")
 	self.root = self.character:WaitForChild("HumanoidRootPart")
-	
+
 	self.alive = true
-	
+
 	self._connections = {}
-	
+
 	local deathConnection = self.humanoid.Died:Connect(function()
 		self.alive = false
 		self.player.CharacterAdded:Wait()
 		self.alive = true
-		
+
 	end)
 	table.insert(self._connections, deathConnection)
-	
+
 	return self
-	
+
 end
 
 function PlayerInfo:GetCFrame()
@@ -121,15 +121,15 @@ local CBuff = {}
 CBuff.__index = CBuff
 
 function CBuff.new()
-	
+
 	local self = setmetatable({}, CBuff)
-	
+
 	self.buffer = {}
 	self.bufferSize = 20
 	self.lastBuffer = os.clock()
-	
+
 	return self
-	
+
 end
 
 function CBuff:Write(new)
@@ -141,7 +141,7 @@ function CBuff:Write(new)
 			table.remove(self.buffer, 1)
 		end
 	end
-	
+
 	table.insert(self.buffer, new)
 end
 
@@ -175,22 +175,22 @@ function Guard:Stop()
 end
 
 function Guard.new(player)
-	
+
 	local self = {}
-	
+
 	-- private variables --
 	local bindBins = {}
 	bindBins["onCycle"] = BindBin.new()
 	bindBins["onScan"] = BindBin.new()
 	local playerInfo = PlayerInfo.new(player)
 	local cBuff = CBuff.new()
-	
+
 	-- public values --
 	self.buffSpeed = 1
 	self.buffSize = 20
-	
+
 	-- public methods --
-	
+
 	function self:Destroy()
 		for _, bindBin in pairs(bindBins) do
 			BindBin:Unbind()
@@ -203,18 +203,18 @@ function Guard.new(player)
 	end
 
 	function self:Scan()
-		
+
 		if (os.clock() - cBuff.lastBuffer) > self.buffSpeed then
 			if playerInfo:IsInGame() then
 				if playerInfo.alive then
-					
+
 					cBuff.bufferSize = self.buffSize
 					cBuff:Write({
 						CFrame = playerInfo:GetCFrame();
 					})
 					bindBins["onCycle"]:Fire()
 					cBuff.lastBuffer = os.clock()
-					
+
 					if #cBuff.buffer > 2 then
 						bindBins["onScan"]:Fire()
 					end
@@ -224,7 +224,7 @@ function Guard.new(player)
 			end
 		end
 	end	
-	
+
 	function self:Write(data)
 		assert(typeof(data) == "table", string.format("Expected table, got %s.", typeof(data)))
 		local cHead = cBuff:Read()
@@ -232,30 +232,28 @@ function Guard.new(player)
 			cHead[i] = v
 		end
 	end
-	
+
 	function self:Read()
 		return cBuff:Read()
 	end
-	
+
 	function self:GetBuffer()
 		return cBuff.buffer
 	end
-	
+
 	function self:SecondsToBuffSize(seconds)
 		return seconds / self.buffSpeed
 	end
-	
+
 	function self:Bind(bindBin, callback)
 		if bindBins[bindBin] then
 			return bindBins[bindBin]:Bind(callback)
 		end
 	end
-	
+
 	table.insert(Guard.guards, self)
 	return self
-	
-end
 
-Guard:Start()
+end
 
 return Guard
