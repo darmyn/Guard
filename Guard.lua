@@ -256,4 +256,6 @@ function Guard.new(player)
 
 end
 
+Guard:Start()
+
 return Guard
