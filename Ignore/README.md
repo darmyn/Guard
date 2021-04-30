@@ -1,6 +1,10 @@
 # Guard
  A lightweight anti-cheat framework.
 
+[Roblox Module](https://web.roblox.com/library/6745363798/Guard)
+
+[Click to view the WIKI](https://github.com/darmyn/Guard/wiki)
+
 
 ### Basic Usage:
 
@@ -36,6 +40,3 @@ end
 Players.PlayerAdded:Connect(PlayerAdded)
  ```
 
- ### WIKI/API
-
- [Click to view the WIKI](https://github.com/darmyn/Guard/wiki)
