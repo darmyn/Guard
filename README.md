@@ -5,11 +5,9 @@
 ### Basic Usage:
 
  ```Lua
-
 local Players = game:GetService("Players")
 
 local Guard = require(script.Guard)
-Guard:Start()
 
 function PlayerAdded(player)
 	
@@ -29,13 +27,13 @@ function PlayerAdded(player)
 	local scanBind = guard:Bind("onScan", function()
 		local cHead, cNeck = guard:Read()
 		print(cHead, cNeck)
-		-- this is where you run algorithms to determin if players are cheating.
+		-- cHead is the head of the circular buffer, meaning it is the most recent thread of data.
+		-- cNeck is the index/value pair after cHead, meaning it is the second most recent thread of data.
 	end)
 	
 end
 
 Players.PlayerAdded:Connect(PlayerAdded)
-
  ```
 
  ### WIKI/API
