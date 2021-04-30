@@ -1,0 +1,1 @@
+[Basic Usage](https://github.com/darmyn/Guard/blob/main/README.md#basic-usage) | [Module](https://github.com/darmyn/Guard/blob/main/Guard.lua) | [Roblox Module](https://web.roblox.com/library/6745363798/Guard)
