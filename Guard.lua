@@ -18,6 +18,8 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+-- PRIVATE FUNCTIONS --
+
 -- OBJECTS
 
 local Bind = {}
@@ -96,6 +98,9 @@ function PlayerInfo.new(player)
 	local deathConnection = self.humanoid.Died:Connect(function()
 		self.alive = false
 		self.player.CharacterAdded:Wait()
+		self.character = player.Character
+		self.humanoid = self.character:WaitForChild("Humanoid")
+		self.root = self.character:WaitForChild("HumanoidRootPart")
 		self.alive = true
 
 	end)
@@ -154,6 +159,10 @@ local Guard = {
 }
 
 local hearbeatConnection
+local globalBindBins = {
+		onCycle = BindBin.new();
+		onScan = BindBin.new();
+};
 
 function Guard:Start()
 	if not hearbeatConnection then
@@ -179,13 +188,16 @@ function Guard.new(player)
 	local self = {}
 
 	-- private variables --
+	local cBuff = CBuff.new()
+	local playerInfo = PlayerInfo.new(player)
 	local bindBins = {}
 	bindBins["onCycle"] = BindBin.new()
 	bindBins["onScan"] = BindBin.new()
-	local playerInfo = PlayerInfo.new(player)
-	local cBuff = CBuff.new()
-
+	
+	-- private functions --
+	
 	-- public values --
+
 	self.buffSpeed = 1
 	self.buffSize = 20
 
@@ -193,7 +205,7 @@ function Guard.new(player)
 
 	function self:Destroy()
 		for _, bindBin in pairs(bindBins) do
-			BindBin:Unbind()
+			bindBin:Unbind()
 		end
 		local index = table.find(Guard.guards, self)
 		if index then
@@ -213,10 +225,12 @@ function Guard.new(player)
 						CFrame = playerInfo:GetCFrame();
 					})
 					bindBins["onCycle"]:Fire()
+					globalBindBins["onCycle"]:Fire()
 					cBuff.lastBuffer = os.clock()
 
 					if #cBuff.buffer > 2 then
 						bindBins["onScan"]:Fire()
+						globalBindBins["onScan"]:Fire()
 					end
 				end
 			else
@@ -250,7 +264,7 @@ function Guard.new(player)
 			return bindBins[bindBin]:Bind(callback)
 		end
 	end
-
+	
 	table.insert(Guard.guards, self)
 	return self
 

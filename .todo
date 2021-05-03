@@ -1,0 +1,3 @@
+update wiki to show documention of Bind class
+add :Render() method
+---------------create GLOBAL binds. These binds are applied to all guards instead of just one.
