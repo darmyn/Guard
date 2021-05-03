@@ -11,24 +11,21 @@ local Guard = require(script.Guard)
 
 function PlayerAdded(player)
 	
+	local character = player.Character or player.CharacterAdded:Wait()
+	
 	local guard = Guard.new(player)
 	guard.buffSpeed = 1 -- how long between each cycle
 	guard.buffSize = guard:SecondsToBuffSize(30) -- the buffer size will be 15 in this example, because 15 index/value pairs every 2 seconds is equivilant to 30 seconds worth of data.
 	
-	local cycleBind = guard:Bind("onCycle", function()
-		local character = player.Character
-		local humanoid = character:WaitForChild("Humanoid")
-		guard:Write({
-			Health = humanoid.Health
-		})
-	end)
-	-- binds are automatically unbinded when the player leaves, without the use of connections.
-	
 	local scanBind = guard:Bind("onScan", function()
 		local cHead, cNeck = guard:Read()
-		print(cHead, cNeck)
-		-- cHead is the head of the circular buffer, meaning it is the most recent thread of data.
-		-- cNeck is the index/value pair after cHead, meaning it is the second most recent thread of data.
+		local distanceTravelled = (cNeck.CFrame.Position - cHead.CFrame.Position).Magnitude
+		if distanceTravelled > (character.Humanoid.WalkSpeed * guard.buffSpeed) + 2 then
+			character.HumanoidRootPart.CFrame = cNeck.CFrame
+			guard:Write({
+				CFrame = cNeck.CFrame
+			})
+		end
 	end)
 	
 end
